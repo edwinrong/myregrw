@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	int ret_val;
 
 
-	int reg_info[2] = {1, 2};
+	long reg_info[2] = {0xf0000000, 0xf0000002};
 
 	fd = open(DEVICE_NAME, O_RDWR);
 	if(fd < 0)
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	printf("before issuing ioctl to exchange data between user and kernel spaces.\n");
 	printf("--------------------------------------------------------------------\n");
 	for (i=0; i<2; i++)	{
-		printf("reg_info[%d] = %d \n", i, reg_info[i]);
+		printf("reg_info[%d] = %lx \n", i, reg_info[i]);
 	}
 
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	printf("after issuing ioctl to exchange data between user and kernel spaces.\n");
 	printf("--------------------------------------------------------------------\n");
 	for (i=0; i<2; i++)	{
-		printf("reg_info[%d] = %d\n", i, reg_info[i]);
+		printf("reg_info[%d] = %lx\n", i, reg_info[i]);
 	}
 
 

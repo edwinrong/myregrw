@@ -27,7 +27,8 @@ static int myregrw_opened = 0;
 static char msg[BUF_LEN];
 static char *msg_ptr;
 
-static int reg_info[2];
+static long reg_info[2];			/* reg_info[0] : register address
+									   reg_info[1] : register data  tobe write to the address */
 
 #ifdef REGISTER_2
 static dev_t devid;
@@ -133,7 +134,7 @@ static ssize_t myregrw_write(struct file *file, const char __user *buf, size_t l
 
 static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 {
-		int i, err = 0, ret = 0;
+		int i, err = 0, retval, ret = 0;
 
 	/* don't even decode wrong cmds: better returning  ENOTTY than EFAULT */
 	if (_IOC_TYPE(cmd) != SCULLP_IOC_MAGIC) return -ENOTTY;
@@ -172,12 +173,22 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 		break;
 
 	case SCULLP_IOCXORDER: /* eXchange: use arg as pointer */		
+		printk("register info read from userspace.\n");
+		printk("----------------------------------\n");
 		for(i=0; i<2; i++) {
-			ret = __get_user(reg_info[i], (int __user *)arg + i);
-			if (ret == 0) {
-				ret = __put_user(reg_info[i]+i, (int __user *) arg + i);
-				if(ret)
-					printk("error to write data to userspace.\n");
+			retval = __get_user(reg_info[i], (int __user *)arg + i);
+			if (retval == 0) {
+				printk("reg_info[%d] = %lx\n", i, reg_info[i]);
+			}
+		}
+
+		printk("register info write to userspace .\n");
+		printk("----------------------------------\n");
+		for(i=0; i<2; i++) {
+			reg_info[i] += 3;
+			retval = __put_user(reg_info[i], (int __user *)arg + i);
+			if (retval == 0) {
+				printk("reg_info[%d] = %lx\n", i, reg_info[i]);
 			}
 		}
 		break;

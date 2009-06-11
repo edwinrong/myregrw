@@ -4,6 +4,7 @@
 #include <linux/fs.h>
 #include <asm/uaccess.h>
 #include <linux/cdev.h>
+#include <asm/io.h>
 
 #include "myregrw.h"
 
@@ -27,8 +28,8 @@ static int myregrw_opened = 0;
 static char msg[BUF_LEN];
 static char *msg_ptr;
 
-static long reg_info[2];			/* reg_info[0] : register address
-									   reg_info[1] : register data  tobe write to the address */
+static unsigned long reg_info[2];			/* reg_info[0] : register address
+											   reg_info[1] : register data  tobe write to the address */
 
 #ifdef REGISTER_2
 static dev_t devid;
@@ -132,13 +133,27 @@ static ssize_t myregrw_write(struct file *file, const char __user *buf, size_t l
 	return -EINVAL; 
 }
 
+
+/* display controller register I/O routines */
+static __inline__ unsigned long read_reg(u32 phy_addr)
+{
+	return (ioread32((void __iomem *)phy_addr));
+}
+static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
+{
+	iowrite32(val, (void __iomem *)phy_addr);
+	return (val);
+}
+
+
+
 static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 {
 		int i, err = 0, retval, ret = 0;
 
 	/* don't even decode wrong cmds: better returning  ENOTTY than EFAULT */
-	if (_IOC_TYPE(cmd) != SCULLP_IOC_MAGIC) return -ENOTTY;
-	if (_IOC_NR(cmd) > SCULLP_IOC_MAXNR) return -ENOTTY;
+	if (_IOC_TYPE(cmd) != MYREGRW_MAGIC) return -ENOTTY;
+	if (_IOC_NR(cmd) > MYREGRW_MAXNR) return -ENOTTY;
 
 	/*
 	 * the type is a bitmask, and VERIFY_WRITE catches R/W
@@ -155,30 +170,30 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 
 	switch(cmd) {
 
-	case SCULLP_IOCRESET:							
+	case MYREGRW_CMD0:							
 		//scullp_qset = SCULLP_QSET;
 		//scullp_order = SCULLP_ORDER;
 		break;
 
-	case SCULLP_IOCSORDER: /* Set: arg points to the value */   
+	case MYREGRW_CMD1: /* Set: arg points to the value */   
 		//ret = __get_user(scullp_order, (int __user *) arg);
 		break;
 
-	case SCULLP_IOCTORDER: /* Tell: arg is the value */			
+	case MYREGRW_CMD2: /* Tell: arg is the value */			
 		//scullp_order = arg;
 		break;
 
-	case SCULLP_IOCGORDER: /* Get: arg is pointer to result */		
+	case MYREGRW_CMD3: /* Get: arg is pointer to result */		
 		//ret = __put_user (scullp_order, (int __user *) arg);
 		break;
 
-	case SCULLP_IOCXORDER: /* eXchange: use arg as pointer */		
+	case MYREGRW_WRITE: /* eXchange: use arg as pointer */		
 		printk("register info read from userspace.\n");
 		printk("----------------------------------\n");
 		for(i=0; i<2; i++) {
 			retval = __get_user(reg_info[i], (int __user *)arg + i);
 			if (retval == 0) {
-				printk("reg_info[%d] = %lx\n", i, reg_info[i]);
+				printk("reg_info[%d] = 0x%lx\n", i, reg_info[i]);
 			}
 		}
 
@@ -188,9 +203,29 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 			reg_info[i] += 3;
 			retval = __put_user(reg_info[i], (int __user *)arg + i);
 			if (retval == 0) {
-				printk("reg_info[%d] = %lx\n", i, reg_info[i]);
+				printk("reg_info[%d] = 0x%lx\n", i, reg_info[i]);
 			}
 		}
+		break;
+
+	case MYREGRW_READ: /* eXchange: use arg as pointer */		
+		printk("Physical address:\n");
+		printk("-----------------\n");
+		retval = __get_user(reg_info[0], (unsigned long __user *)arg);
+		if (retval == 0) {
+			//printk("reg_info[0] = %lx\n", reg_info[0]);
+			printk("PHY ADDR = 0x%lx\n", reg_info[0]);
+		}
+		
+		printk("\n\n");
+
+		printk("write the content of the PHY ADDR into userspace .\n");
+		printk("--------------------------------------------------\n");
+		retval = __put_user(read_reg(reg_info[0]), (unsigned long __user *)arg+1);
+		if (retval == 0) {
+			printk("Content of PHY ADDR 0x%lx = 0x%lx\n", reg_info[0], read_reg(reg_info[0]));
+		}
+	
 		break;
 
 	default:  /* redundant, as cmd was checked against MAXNR */

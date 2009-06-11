@@ -16,15 +16,19 @@
 #include <linux/ioctl.h>
 //#include <linux/cdev.h>
 
+
+#define  READ_NUM 1
+#define	 WRITE_NUM 2
+
 /*
  * Macros to help debugging
  */
 
 #undef PDEBUG             /* undef it, just in case */
-#ifdef SCULLP_DEBUG
+#ifdef MYREGRW_DEBUG
 #  ifdef __KERNEL__
      /* This one if debugging is on, and kernel space */
-#    define PDEBUG(fmt, args...) printk( KERN_DEBUG "scullp: " fmt, ## args)
+#    define PDEBUG(fmt, args...) printk( KERN_DEBUG "myregrw: " fmt, ## args)
 #  else
      /* This one for user space */
 #    define PDEBUG(fmt, args...) fprintf(stderr, fmt, ## args)
@@ -42,9 +46,9 @@
  */
 
 /* Use 'K' as magic number */
-#define SCULLP_IOC_MAGIC  'K'
+#define MYREGRW_MAGIC  'K'
 
-#define SCULLP_IOCRESET    _IO(SCULLP_IOC_MAGIC, 0)
+#define MYREGRW_CMD0    _IO(MYREGRW_MAGIC, 0)
 
 /*
  * S means "Set" through a ptr,
@@ -54,12 +58,13 @@
  * X means "eXchange": G and S atomically
  * H means "sHift": T and Q atomically
  */
-#define SCULLP_IOCSORDER   _IOW(SCULLP_IOC_MAGIC,  1, int)
-#define SCULLP_IOCTORDER   _IO(SCULLP_IOC_MAGIC,   2)
-#define SCULLP_IOCGORDER   _IOR(SCULLP_IOC_MAGIC,  3, int)
-#define SCULLP_IOCXORDER   _IOWR(SCULLP_IOC_MAGIC, 4, int)
+#define MYREGRW_CMD1	_IOW(MYREGRW_MAGIC,  1, int)
+#define MYREGRW_CMD2	_IO(MYREGRW_MAGIC,   2)
+#define MYREGRW_CMD3	_IOR(MYREGRW_MAGIC,  3, int)
+#define MYREGRW_WRITE	_IOWR(MYREGRW_MAGIC, 4, int)
+#define MYREGRW_READ	_IOWR(MYREGRW_MAGIC, 5, int)
 
 
-#define SCULLP_IOC_MAXNR 4
+#define MYREGRW_MAXNR 5
 
 

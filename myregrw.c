@@ -6,7 +6,10 @@
 #include <linux/cdev.h>
 #include <asm/io.h>
 
+#ifdef  EVB_IM9815
 #include <mach/hardware.h>
+#endif
+
 #include "myregrw.h"
 
 #define REGISTER_1

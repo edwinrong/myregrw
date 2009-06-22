@@ -16,6 +16,7 @@
 #include <linux/ioctl.h>
 //#include <linux/cdev.h>
 
+#define EVB_IM9815
 
 #define  READ_NUM 1
 #define	 WRITE_NUM 2

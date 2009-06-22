@@ -21,10 +21,12 @@ void record_contend(const char *filename, unsigned long reg_info[])
 	sprintf(buf, "%lx\t\t%-lx\n", reg_info[0], reg_info[1]);
 		
 	ret = fwrite(buf, strlen(buf), 1, fp);
-	printf("ret = %d\n", ret);
+	//printf("ret = %d\n", ret);
 	if(ret != 1)
 		printf("Error in recording the contents of registers!\n");
 
 	fclose(fp);
 
 }
+
+

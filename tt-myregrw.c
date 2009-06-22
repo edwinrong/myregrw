@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 				printf("ioctl put and get msg failed : %d\n", ret_val);
 				//exit(-1);
 			} else {
-				printf("addr = %lx,\tvalue = %lx\n", reg_info[0], reg_info[1]);
+				//printf("addr = %lx,\tvalue = %lx\n", reg_info[0], reg_info[1]);
 				record_contend(CONTENT_FILE, reg_info);
 			}
 		}

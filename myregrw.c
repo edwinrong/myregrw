@@ -6,6 +6,7 @@
 #include <linux/cdev.h>
 #include <asm/io.h>
 
+#include <mach/hardware.h>
 #include "myregrw.h"
 
 #define REGISTER_1
@@ -135,6 +136,17 @@ static ssize_t myregrw_write(struct file *file, const char __user *buf, size_t l
 
 
 /* display controller register I/O routines */
+#ifdef  EVB_IM9815
+static __inline__ unsigned long read_reg(u32 phy_addr)
+{
+	return (ioread32(IO_ADDRESS(phy_addr)));
+}
+static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
+{
+	iowrite32(val, IO_ADDRESS(phy_addr));
+	return (val);
+}
+#else
 static __inline__ unsigned long read_reg(u32 phy_addr)
 {
 	return (ioread32((void __iomem *)phy_addr));
@@ -144,6 +156,7 @@ static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
 	iowrite32(val, (void __iomem *)phy_addr);
 	return (val);
 }
+#endif
 
 
 

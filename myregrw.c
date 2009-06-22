@@ -6,9 +6,9 @@
 #include <linux/cdev.h>
 #include <asm/io.h>
 
-#ifdef  EVB_IM9815
+//#ifdef  EVB_IM9815
 #include <mach/hardware.h>
-#endif
+//#endif
 
 #include "myregrw.h"
 

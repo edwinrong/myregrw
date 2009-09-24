@@ -3,6 +3,7 @@
 #include <unistd.h>		/* exit */
 #include<stdlib.h>		
 #include <sys/ioctl.h>		/* ioctl */
+#include <errno.h>
 
 #include "myregrw.h"
 #include "phy_addr.h"
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 	fd = open(DEVICE_NAME, O_RDWR);
 	if(fd < 0)
 	{
-		printf("error\n");
+		printf("error:  %s (%d)\n", strerror(errno), errno);
 		return -1;
 	}
 	

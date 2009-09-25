@@ -166,6 +166,7 @@ static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
 static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 {
 		int i, err = 0, retval, ret = 0;
+		unsigned long tmp_val = 0;
 
 	/* don't even decode wrong cmds: better returning  ENOTTY than EFAULT */
 	if (_IOC_TYPE(cmd) != MYREGRW_MAGIC) return -ENOTTY;
@@ -215,6 +216,18 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 
 		printk("register info write to userspace .\n");
 		printk("----------------------------------\n");
+#ifndef DEBUG
+		/* Write the config value to the register */
+		write_reg(reg_info[0], reg_info[1]);
+		tmp_val = read_reg(reg_info[0]);
+		/* and read it back to userland*/
+		retval = __put_user(tmp_val, (unsigned long __user *)arg+1);
+		if (retval == 0) {
+			printk("Content of PHY ADDR 0x%lx = 0x%lx\n", reg_info[0], tmp_val);
+		}
+		
+		break;
+#else
 		for(i=0; i<2; i++) {
 			reg_info[i] += 3;
 			retval = __put_user(reg_info[i], (int __user *)arg + i);
@@ -223,9 +236,10 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 			}
 		}
 		break;
+#endif
 
 	case MYREGRW_READ: /* eXchange: use arg as pointer */		
-		printk("Physical address:\n");
+		printk("\nPhysical address:\n");
 		printk("-----------------\n");
 		retval = __get_user(reg_info[0], (unsigned long __user *)arg);
 		if (retval == 0) {
@@ -233,13 +247,14 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 			printk("PHY ADDR = 0x%lx\n", reg_info[0]);
 		}
 		
-		printk("\n\n");
+		printk("\n");
 
-		printk("write the content of the PHY ADDR into userspace .\n");
+		printk("Return the content of the PHY ADDR into userspace .\n");
 		printk("--------------------------------------------------\n");
-		retval = __put_user(read_reg(reg_info[0]), (unsigned long __user *)arg+1);
+		tmp_val = read_reg(reg_info[0]);
+		retval = __put_user(tmp_val, (unsigned long __user *)arg+1);
 		if (retval == 0) {
-			printk("Content of PHY ADDR 0x%lx = 0x%lx\n", reg_info[0], read_reg(reg_info[0]));
+			printk("Content of PHY ADDR 0x%lx = 0x%lx\n", reg_info[0], tmp_val);
 		}
 	
 		break;

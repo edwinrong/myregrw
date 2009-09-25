@@ -70,13 +70,13 @@ int query_lines(const char *filename)
 
 
 #if 1
-int parse_config(const char *filename, struct addr_info *p_addr_info)
+int parse_config(const char *filename, struct config_info *p_config_info, int mode)
 {
 	FILE *fp;
 	char *line;
 	ssize_t n;
 	size_t len = 0;
-	char *base_addr, *count;
+	char *base_addr, *count, *val;
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -99,15 +99,33 @@ int parse_config(const char *filename, struct addr_info *p_addr_info)
 
 		base_addr = strtok(line, " ");
 		count = strtok(NULL, " ");
+		if(mode == 0)
+			val = strtok(NULL, " ");
 #if 0
 		printf("base_addr=%s\n", base_addr);
 		printf("count=%s\n", count);
+		if (mode == 0)
+			printf("val=%s\n", val);
 #endif
-		p_addr_info->base_addr = strtoul(base_addr, NULL, 16);
-		p_addr_info->count = strtoul(count, NULL, 10);
-		//printf("base_addr = %lx, count=%d\n", p_addr_info->base_addr, p_addr_info->count);
-		
-		p_addr_info++;
+
+#if 1
+		p_config_info->base_addr = strtoul(base_addr, NULL, 16);
+		p_config_info->count = strtoul(count, NULL, 10);
+		if(mode == 0)
+			p_config_info->val= strtoul(val, NULL, 10);
+#else
+
+		p_config_info->base_addr = 0xf0000000;
+		p_config_info->count = 3;
+		p_config_info->val= 5;
+#endif
+#if 0
+		printf("base_addr = %lx, count=%d", p_config_info->base_addr, p_config_info->count);
+		if(mode == 0)
+			printf("\tval=%ld\n", p_config_info->val);
+#endif		
+		p_config_info++;
+		//printf("address of p_config_info = %p\n", p_config_info);
 
 	}
 

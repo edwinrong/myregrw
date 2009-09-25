@@ -112,7 +112,7 @@ int parse_config(const char *filename, struct config_info *p_config_info, int mo
 		p_config_info->base_addr = strtoul(base_addr, NULL, 16);
 		p_config_info->count = strtoul(count, NULL, 10);
 		if(mode == 0)
-			p_config_info->val= strtoul(val, NULL, 10);
+			p_config_info->val= strtoul(val, NULL, 16);
 #else
 
 		p_config_info->base_addr = 0xf0000000;

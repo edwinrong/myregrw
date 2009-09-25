@@ -28,32 +28,52 @@ Change the permission of the patition with "RW", where xxx resides in, eg, /data
 	#mount -o remount, rw /data
 NOTE: if the above operaitons is not done, no permission to do something promotion will be present.
 
+Common operations:
+~~~~~~~~~~~~~~~~~
 insmod kernel module:
 	# insmod myregrw.ko
 create device node:
 	mknod ./regrw c major 0
-execute applictaion:
-	# ./myregrw addr_file.txt content.txt
 
-In the addr_file.txt Annotations can be noted down with "#" at the beginning of every line.
-The format of register addresses in addr_file.txt is as following:
+Read Registers:
+~~~~~~~~~~~~~~~~~
+execute applictaion:
+	./myregrw config_read.txt content_read.txt read
+In the  config_read.txt Annotations can be noted down with "#" at the beginning of every line.
+The base address must be aligned with "4".
+The format of register addresses in config_read.txt is as following:
 
 #baseaddr count
-F0000001 1 
+F0000000 1 
 
-#read registers F0000002 and F0000003
-F0000002 2
+#read registers F0000004 and F0000008
+F0000004 2
 
-#read registers F0000003, F0000004, and F0000005
-F0000003 3 
+#read registers F0000000, F0000004, and F0000008
+F0000000 3 
 
 #F0000004 4
-#F0000005 5 
+#F0000008 5 
 
 To see the content:
+vi content_read.txt
 
-vi content.txt
+Write Registers:
+~~~~~~~~~~~~~~~~
+execute applictaion:
+      ./myregrw config_read.txt content_read.txt read
+In the  config_read.txt Annotations can be noted down with "#" at the beginning of every line.
+The format of register addresses in config_read.txt is as following:
 
+#baseaddr count val(tobe write and read back)
+#Write 100 to register f0000000
+F0000000 1 100
+
+#Write 5 to register f0000004
+#F0000004 5
+
+To see the content of registers after written operations:
+vi content_write.txt
 
 
 
